@@ -1,4 +1,10 @@
 
+// GET /author
+
+exports.author = function(req,res){
+	res.render('author');
+};
+
 // GET /quizes/question
 
 exports.question = function(req,res){
