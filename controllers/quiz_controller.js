@@ -22,7 +22,7 @@ exports.index = function(req,res){
 
 
 
-// GET /quizes/:id
+// GET /quizes/:id 
 
 exports.show = function(req,res){
 	models.Quiz.find(req.params.quizId).then(function(quiz){
