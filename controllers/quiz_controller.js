@@ -14,8 +14,8 @@ exports.load = function(req,res, next, quizId){
 
 // GET /quizes
 exports.index = function(req,res){
-	models.Quiz.findAll({where: ["pregunta like ?",  '%'+req.query.search+'%']}).then(function(quizes){
-			res.render('quizes/index.ejs',{quizes:quizes});
+	models.Quiz.findAll().then(function(quizes){
+			res.render('quizes/index.ejs',{quizes:quizes,errors:[]});
 	}
 	).catch(function(error){next(error);})
 };
@@ -26,7 +26,7 @@ exports.index = function(req,res){
 
 exports.show = function(req,res){
 	models.Quiz.find(req.params.quizId).then(function(quiz){
-			res.render('quizes/show',{quiz:quiz});
+			res.render('quizes/show',{quiz:quiz,errors: []});
 	})
 };
 
@@ -37,6 +37,33 @@ exports.answer = function(req,res){
 	if(req.query.respuesta===req.quiz.respuesta){
 		resultado='Correcto';
 	}
-		res.render('quizes/answer',{quiz:req.quiz,respuesta:resultado});
+		res.render('quizes/answer',{quiz:req.quiz,
+									respuesta:resultado,
+									errors:[]});
 };
 
+// GET /quizes/new
+
+exports.new = function(req,res){
+	var quiz =models.Quiz.build(//crea objeto quiz
+		{pregunta:"Pregunta",respuesta:"Respuesta"}
+		);
+		res.render('quizes/new',{quiz:quiz,errors:[]});
+};
+
+// GET /quizes/create
+exports.create = function(req,res){
+	var quiz =models.Quiz.build(req.body.quiz);
+	
+	var errors=quiz.validate();
+
+	if(errors){
+			var i=0; var errores=new Array();//se convierte en [] con la propiedad message por compatibilida con layout
+			for (var prop in errors) errores[i++]={message: errors[prop]}; 
+			res.render('quizes/new',{quiz:quiz, errors:errores});
+	}else{
+			//guarda en DB los campos pregunta y respueta de quiz
+			quiz.save({fields:["pregunta","respuesta"]}).then(function(){
+			res.redirect('/quizes')})
+	} //Redireccion HTTP (URL relativo) lista de preguntas
+};
