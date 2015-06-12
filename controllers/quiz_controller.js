@@ -19,7 +19,7 @@ exports.index = function(req,res){
 	}
 	).catch(function(error){next(error);})
 };
-//{where: ["pregunta like ?", req.query.search]}
+
 
 
 // GET /quizes/:id 
@@ -66,4 +66,35 @@ exports.create = function(req,res){
 			quiz.save({fields:["pregunta","respuesta"]}).then(function(){
 			res.redirect('/quizes')})
 	} //Redireccion HTTP (URL relativo) lista de preguntas
+};
+
+
+// GET /quizes/:id/edit
+exports.edit = function(req,res){
+	var quiz = req.quiz//autoload de instancia de quiz
+	res.render('quizes/edit',{quiz:quiz,errors:[]});
+};
+
+// PUT /quizes/:id
+exports.update = function(req,res){
+	req.quiz.pregunta = req.body.quiz.pregunta;
+	req.quiz.respuesta = req.body.quiz.respuesta;
+	var errors=req.quiz.validate();
+	
+	if(errors){
+			var i=0; var errores=new Array();//se convierte en [] con la propiedad message por compatibilida con layout
+			for (var prop in errors) errores[i++]={message: errors[prop]}; 
+			res.render('quizes/edit',{quiz:req.quiz, errors:errores});
+	}else{
+			//guarda en DB los campos pregunta y respueta de quiz
+			req.quiz.save({fields:["pregunta","respuesta"]}).then(function(){
+			res.redirect('/quizes')})
+	} //Redireccion HTTP (URL relativo) lista de preguntas
+};
+
+// DELETE /quizes/:id
+exports.destroy = function(req,res){
+	req.quiz.destroy().then(function(){
+			res.redirect('/quizes');
+}).catch(function(error){next(error)});
 };
